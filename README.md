@@ -7,7 +7,10 @@
 
 # syzygy-ai-ios
 
-AI layer contracts for the Syzygy iOS ecosystem. Provides abstract interfaces for LLM integration, agent protocols, RAG pipelines, memory management, and token streaming.
+AI layer contracts for the Syzygy iOS ecosystem. Provides abstract interfaces for LLM integration, agent protocols, RAG pipelines, memory management, and text embeddings.
+
+**v1.0.0 — Pure Contracts Only**
+This release contains protocol and type definitions only. No concrete implementations are included. Implementations targeting specific LLM backends, vector stores, or memory systems should depend on this package and provide their own conforming types.
 
 ## Contracts
 
@@ -15,9 +18,14 @@ AI layer contracts for the Syzygy iOS ecosystem. Provides abstract interfaces fo
 |---|---|
 | `LLMProvider` | Abstract interface for LLM backend integration |
 | `AgentProtocol` | ReAct loop contract (Reason → Act → Observe) |
+| `EmbeddingProvider` | Abstract interface for generating text embeddings |
 | `RAGProvider` | Retrieval-augmented generation interface |
 | `MemoryManager` | Conversation context management contract |
-| `StreamHandler` | Token streaming abstraction |
+
+## Known Limitations (v1.0.0)
+
+1. `AgentStep.input` is `[String: String]` instead of `[String: Any]` — `Any` is not `Sendable` in Swift 6. This is a v1.0.0 limitation; a future release may introduce a `Sendable`-compatible value type.
+2. `AgentTool` is marked `@unchecked Sendable` because the `execute` closure cannot be automatically verified as `Sendable` by the Swift 6 compiler. `AgentRequest` is also `@unchecked Sendable` for the same reason.
 
 ## Installation
 

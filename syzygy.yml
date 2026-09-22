@@ -3,5 +3,5 @@ layer: ai
 platform: ios
 version: 1.0.0
 foundation: ">=1.2.0 <2.0.0"
-description: "AI layer contracts for iOS — LLMProvider, AgentProtocol, RAGProvider, MemoryManager, StreamHandler"
-contracts: [LLMProvider, AgentProtocol, RAGProvider, MemoryManager, StreamHandler]
+description: "AI layer contracts for iOS — LLMProvider, AgentProtocol, EmbeddingProvider, RAGProvider, MemoryManager"
+contracts: [LLMProvider, AgentProtocol, EmbeddingProvider, RAGProvider, MemoryManager]
