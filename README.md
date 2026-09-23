@@ -7,10 +7,15 @@
 
 # syzygy-ai-ios
 
-AI layer contracts for the Syzygy iOS ecosystem. Provides abstract interfaces for LLM integration, agent protocols, RAG pipelines, memory management, and text embeddings.
+The AI layer of the Syzygy ecosystem — providing LLMProvider, AgentProtocol, EmbeddingProvider, RAGProvider, and MemoryManager contracts for iOS.
 
-**v1.1.0 — Extended Contracts**
-Adds structured tool calling, a typed error model, operational metadata, stream semantics documentation, RAG/memory contract improvements, and the shared `JSONValue` type.
+> **v1.1.0 — Extended Contracts**
+> Adds structured tool calling, a typed error model, operational metadata, stream semantics documentation, RAG/memory contract improvements, and the shared `JSONValue` type.
+>
+> `RAGChunk.id: String?` is now an optional field (null by default). It will become required in v2.0.0.
+
+> **v1.0.0 — Pure Contracts Only**
+> This release contains protocol and struct definitions only. No concrete implementations are included. Implementations targeting specific LLM backends, vector stores, or memory systems should depend on this package and provide their own conforming types.
 
 > **Breaking Changes in v1.1.0**
 >
@@ -21,61 +26,99 @@ Adds structured tool calling, a typed error model, operational metadata, stream 
 > | `LLMMessage.Role.toolCall` | Removed. Tool calls use `toolCalls` field on `.assistant` messages; tool results use `toolCallResult` on `.tool` messages. |
 > | `MemoryManager` namespace methods | Moved to separate `NamespacedMemoryManager` protocol. |
 
-## Version History
+## About
 
-| Version | Notes |
-|---|---|
-| `1.1.0` | Tool calling, `AIError`, `JSONValue`, metadata fields, stream semantics, namespaced memory |
-| `1.0.0` | Pure contracts — initial release |
+syzygy-ai-ios defines the AI contracts that downstream modules implement. It depends only on `syzygy-foundation-ios` and provides the abstraction layer for LLM backends, agent loops, retrieval-augmented generation, memory management, and token streaming. No concrete implementations ship here — conforming implementations live in dedicated service modules.
 
-## Contracts
+## Role in the Syzygy Ecosystem
 
-| Name | Description |
+`syzygy-ai-ios` is a peer layer that depends on Foundation and nothing else. It exposes AI contracts that application modules and AI service implementations depend on.
+
+Full ecosystem architecture: [ecosystem-fragment.md](https://github.com/Syzygy-Hub/.github/blob/main/docs/ecosystem-fragment.md)
+
+### Contracts
+
+| Contract | Description |
 |---|---|
 | `LLMProvider` | Abstract interface for LLM backend integration |
 | `AgentProtocol` | ReAct loop contract (Reason → Act → Observe) |
-| `EmbeddingProvider` | Abstract interface for generating text embeddings |
 | `RAGProvider` | Retrieval-augmented generation interface |
 | `MemoryManager` | Conversation context management contract |
+| `EmbeddingProvider` | Abstract interface for generating text embeddings |
 
-## v1.1.0 — New Contracts
+### NamespacedMemoryManager
+
+`NamespacedMemoryManager` extends `MemoryManager` with namespace-scoped operations. On iOS, Android, and React Native, namespace variants use **overloaded method names** — the same verb as the base `MemoryManager` method with an additional `namespace` parameter (e.g. `add(_:namespace:)`, `retrieve(query:namespace:limit:)`). Flutter uses **distinct method names** (`addToNamespace`, `retrieveFromNamespace`, `deleteEntry`, `clearNamespace`) because Dart does not support method overloading.
+
+## What's New in v1.1.0
 
 ### JSONValue
+
 `JSONValue` is a `Sendable, Codable, Equatable` enum replacing `[String: Any]` in tool contracts. Typealiases `JSONObject` and `JSONArray` are provided.
 
 ### Structured Tool Calling
+
 - `ToolCallRequest` — LLM-requested tool invocation (id, name, arguments as `JSONObject`)
 - `ToolCallResult` — result returned to the model (toolCallId, content, isError)
 - `LLMMessage` gains `toolCalls: [ToolCallRequest]?` (on `.assistant` role) and `toolCallResult: ToolCallResult?` (on `.tool` role)
 
 ### AIError
+
 `AIError` is a typed `Error & Sendable` enum covering authentication failures, rate limiting, network errors, invalid requests, provider failures, and cancellation. All provider protocols document that they throw `AIError`.
 
 ### Operational Metadata
+
 - `LLMRequest` gains `requestId: String?` and `correlationId: String?`
 - `LLMResponse` gains `providerName: String?` and `modelName: String?`
 - `LLMChunk` gains `providerName: String?` and `modelName: String?`
 
 ### Stream Semantics
+
 `StreamContract` (in `StreamSemantics.swift`) documents the stream lifecycle: completion, cancellation, partial results, retry semantics, and thread safety.
 
 ### RAG Improvements
+
 - `RAGChunk` gains `id: String?` (optional; required in v2.0.0), `source: String?`, `documentId: String?`
 - `RAGOptions` gains `maxResults: Int?`; `scoreThreshold` is `Double?` (cross-platform consistent)
 - `RAGProvider.retrieve` signature is `(_ query: String, options: RAGOptions?) async throws -> [RAGChunk]`
 
 ### Memory Improvements
+
 `NamespacedMemoryManager` (separate protocol extending `MemoryManager`) provides: `add(_:namespace:)`, `retrieve(query:namespace:limit:)`, `delete(id:namespace:)`, `clear(namespace:)`. Base `MemoryManager` un-namespaced methods are unchanged.
 
-> **API note — cross-platform naming:** On iOS and Android, `NamespacedMemoryManager` uses the same method names as `MemoryManager` overloaded with a `namespace: String` parameter (`add(_:namespace:)`, `retrieve(query:namespace:limit:)`, `delete(id:namespace:)`, `clear(namespace:)`). React Native follows the same overloaded naming convention. Flutter uses distinct method names — `addToNamespace`, `retrieveFromNamespace`, `deleteEntry`, `clearNamespace` — because Dart does not support method overloading. This divergence is intentional and will not be unified.
-
 ### AgentStep.input
+
 `input` is retained as `[String: String]` for backward compatibility. New optional `structuredInput: JSONObject?` field supports typed JSON values. Both will unify to `JSONObject` in v2.0.0.
 
 ## Known Limitations / Deviations (v1.1.0)
 
 1. `AgentTool` is marked `@unchecked Sendable` because the `execute` closure cannot be automatically verified as `Sendable` by the Swift 6 compiler. `AgentRequest` is also `@unchecked Sendable` for the same reason.
 2. **`AgentStep.input` platform deviation**: iOS retains `input: [String: String]` for backward compatibility while the new `structuredInput: JSONObject?` carries typed values. Android, React Native, and Flutter use a single `JSONObject` field. Both will unify in v2.0.0.
+
+## Release Process
+
+Releases follow the Syzygy tag-push release flow:
+
+1. Create a `release/X.X.X` branch
+2. Bump the version in `syzygy.yml`, `SyzygyAIVersion.swift`, the README badge, and `CHANGELOG.md`
+3. Open a PR to `main` and wait for CI to pass
+4. Merge the PR
+5. Push the tag: `git tag X.X.X` and `git push origin X.X.X`
+6. The tag push triggers the org-level release workflow which validates `syzygy.yml` matches the tag, extracts the CHANGELOG entry, and creates the GitHub Release.
+
+For the full release standard see the [Syzygy-Hub/.github release standard](https://github.com/Syzygy-Hub/.github/blob/main/engineering/standards/release-standard.md).
+
+## Platforms
+
+| Platform | Min Version | Package Manager | Status |
+|---|---|---|---|
+| iOS | 16.0+ | Swift Package Manager | ✅ Supported |
+
+## Requirements
+
+- iOS 16.0+
+- Swift 6.0+
+- Xcode 16+
 
 ## Installation
 
@@ -87,21 +130,27 @@ Adds structured tool calling, a typed error model, operational metadata, stream 
 .product(name: "SyzygyAI", package: "syzygy-ai-ios")
 ```
 
-## Requirements
+## Foundation Dependency
 
-- iOS 16.0+
-- Swift 6.0+
-- Xcode 16+
+`syzygy-ai-ios` depends on `syzygy-foundation-ios` via Swift Package Manager (transitive), so you do not need to declare Foundation separately when you already depend on AI.
 
-> Depends on syzygy-foundation-ios ≥ 1.2.0
+**Depends on:** `syzygy-foundation-ios` >= 1.2.0
+
+**Used by:** application modules and AI service implementations.
 
 ## Development Setup
 
-After cloning, install the pre-push hook:
+After cloning, install the pre-push hook to run a Swift build check before every push:
 
 ```bash
 bash scripts/install-hooks.sh
 ```
+
+The hook runs `swift build` and blocks the push if the build fails. To bypass in an emergency: `git push --no-verify`.
+
+## Contributing
+
+Contributions are welcome. Please follow the [Syzygy engineering standards](https://github.com/Syzygy-Hub/.github/tree/main/engineering/standards) when submitting pull requests.
 
 ## License
 
