@@ -1,7 +1,7 @@
 name: syzygy-ai-ios
 layer: ai
 platform: ios
-version: 1.0.0
+version: 1.1.0
 foundation: ">=1.2.0 <2.0.0"
 description: "AI layer contracts for iOS — LLMProvider, AgentProtocol, EmbeddingProvider, RAGProvider, MemoryManager"
 contracts: [LLMProvider, AgentProtocol, EmbeddingProvider, RAGProvider, MemoryManager]

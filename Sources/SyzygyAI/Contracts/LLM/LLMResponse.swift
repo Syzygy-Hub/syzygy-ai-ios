@@ -19,9 +19,24 @@ public struct LLMResponse: Sendable {
     public let content: String
     public let tokenUsage: TokenUsage?
     public let finishReason: FinishReason?
-    public init(content: String, tokenUsage: TokenUsage? = nil, finishReason: FinishReason? = nil) {
+
+    /// The name of the provider that generated this response (e.g. "openai", "anthropic").
+    public let providerName: String?
+
+    /// The model identifier used for this response (e.g. "gpt-4o", "claude-3-5-sonnet").
+    public let modelName: String?
+
+    public init(
+        content: String,
+        tokenUsage: TokenUsage? = nil,
+        finishReason: FinishReason? = nil,
+        providerName: String? = nil,
+        modelName: String? = nil
+    ) {
         self.content = content
         self.tokenUsage = tokenUsage
         self.finishReason = finishReason
+        self.providerName = providerName
+        self.modelName = modelName
     }
 }
