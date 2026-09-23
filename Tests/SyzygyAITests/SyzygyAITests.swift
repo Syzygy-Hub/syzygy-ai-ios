@@ -16,7 +16,7 @@ struct SyzygyAITests {
         #expect(emb.dimensions == 2)
     }
     @Test func ragChunkHasScore() {
-        let chunk = RAGChunk(content: "test", score: 0.9)
+        let chunk = RAGChunk(id: "chunk-1", content: "test", score: 0.9)
         #expect(chunk.score == 0.9)
     }
     @Test func agentResultHasAnswer() {
