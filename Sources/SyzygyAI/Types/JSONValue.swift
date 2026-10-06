@@ -1,6 +1,6 @@
 import Foundation
 
-/// A Sendable, Codable JSON value type that replaces [String: Any] in tool-related contracts.
+/// A Sendable, Codable JSON value type that represents arbitrary JSON values.
 public enum JSONValue: Sendable, Codable, Equatable {
     case null
     case bool(Bool)
@@ -24,16 +24,16 @@ public enum JSONValue: Sendable, Codable, Equatable {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {
             self = .null
-        } else if let b = try? container.decode(Bool.self) {
-            self = .bool(b)
-        } else if let n = try? container.decode(Double.self) {
-            self = .number(n)
-        } else if let s = try? container.decode(String.self) {
-            self = .string(s)
-        } else if let a = try? container.decode([JSONValue].self) {
-            self = .array(a)
-        } else if let o = try? container.decode([String: JSONValue].self) {
-            self = .object(o)
+        } else if let boolValue = try? container.decode(Bool.self) {
+            self = .bool(boolValue)
+        } else if let numberValue = try? container.decode(Double.self) {
+            self = .number(numberValue)
+        } else if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
+        } else if let arrayValue = try? container.decode([JSONValue].self) {
+            self = .array(arrayValue)
+        } else if let objectValue = try? container.decode([String: JSONValue].self) {
+            self = .object(objectValue)
         } else {
             throw DecodingError.dataCorruptedError(
                 in: container,
@@ -46,11 +46,11 @@ public enum JSONValue: Sendable, Codable, Equatable {
         var container = encoder.singleValueContainer()
         switch self {
         case .null: try container.encodeNil()
-        case .bool(let b): try container.encode(b)
-        case .number(let n): try container.encode(n)
-        case .string(let s): try container.encode(s)
-        case .array(let a): try container.encode(a)
-        case .object(let o): try container.encode(o)
+        case .bool(let boolValue): try container.encode(boolValue)
+        case .number(let numberValue): try container.encode(numberValue)
+        case .string(let stringValue): try container.encode(stringValue)
+        case .array(let arrayValue): try container.encode(arrayValue)
+        case .object(let objectValue): try container.encode(objectValue)
         }
     }
 }

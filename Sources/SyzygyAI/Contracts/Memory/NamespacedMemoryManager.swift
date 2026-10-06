@@ -6,17 +6,17 @@ import Foundation
 /// Implementations of `NamespacedMemoryManager` also satisfy the base `MemoryManager`
 /// protocol; un-namespaced methods should default to the `"default"` namespace for
 /// backward compatibility.
-public protocol NamespacedMemoryManager: MemoryManager {
+public protocol NamespacedMemoryManager: MemoryManager, Sendable {
     /// Store `entry` in the given `namespace`.
-    func add(_ entry: MemoryEntry, namespace: String) async throws
+    func addToNamespace(entry: MemoryEntry, namespace: String) async throws
 
     /// Retrieve up to `limit` entries matching `query` from `namespace`.
     /// Pass `nil` for `limit` to use the implementation's default.
-    func retrieve(query: String, namespace: String, limit: Int?) async throws -> [MemoryEntry]
+    func retrieveFromNamespace(query: String, namespace: String, limit: Int?) async throws -> [MemoryEntry]
 
     /// Delete the entry with the given `id` from `namespace`.
-    func delete(id: String, namespace: String) async throws
+    func deleteEntry(id: String, namespace: String) async throws
 
     /// Remove all entries from `namespace`.
-    func clear(namespace: String) async throws
+    func clearNamespace(namespace: String) async throws
 }

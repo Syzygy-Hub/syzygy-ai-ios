@@ -1,8 +1,8 @@
 import Foundation
 
-/// Represents a tool call requested by the LLM.
-public struct ToolCallRequest: Sendable, Codable, Equatable {
-    /// Provider-assigned identifier for this tool call (used to correlate with ToolCallResult).
+/// A tool invocation requested by the model, carried in an `LLMResponse` or an assistant `LLMMessage`.
+public struct ToolCall: Sendable, Codable, Equatable {
+    /// Provider-assigned identifier for this tool call.
     public let id: String
     /// The name of the tool to invoke.
     public let name: String

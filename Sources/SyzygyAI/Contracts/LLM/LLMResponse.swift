@@ -26,17 +26,22 @@ public struct LLMResponse: Sendable {
     /// The model identifier used for this response (e.g. "gpt-4o", "claude-3-5-sonnet").
     public let modelName: String?
 
+    /// Tool calls requested by the model, if any.
+    public let toolCalls: [ToolCall]?
+
     public init(
         content: String,
         tokenUsage: TokenUsage? = nil,
         finishReason: FinishReason? = nil,
         providerName: String? = nil,
-        modelName: String? = nil
+        modelName: String? = nil,
+        toolCalls: [ToolCall]? = nil
     ) {
         self.content = content
         self.tokenUsage = tokenUsage
         self.finishReason = finishReason
         self.providerName = providerName
         self.modelName = modelName
+        self.toolCalls = toolCalls
     }
 }

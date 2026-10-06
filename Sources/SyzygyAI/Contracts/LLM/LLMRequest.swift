@@ -9,12 +9,17 @@ public struct LLMMessage: Sendable {
     public let content: String
 
     /// Tool calls requested by the assistant in this message (populated when role == .assistant).
-    public let toolCalls: [ToolCallRequest]?
+    public let toolCalls: [ToolCall]?
 
     /// The result of a tool invocation (populated when role == .tool).
     public let toolCallResult: ToolCallResult?
 
-    public init(role: Role, content: String, toolCalls: [ToolCallRequest]? = nil, toolCallResult: ToolCallResult? = nil) {
+    public init(
+        role: Role,
+        content: String,
+        toolCalls: [ToolCall]? = nil,
+        toolCallResult: ToolCallResult? = nil
+    ) {
         self.role = role
         self.content = content
         self.toolCalls = toolCalls
@@ -36,6 +41,9 @@ public struct LLMRequest: Sendable {
     /// Trace chain ID for distributed tracing across provider calls.
     public let correlationId: String?
 
+    /// Tools the model may call. `nil` means no tools are offered.
+    public let tools: [AgentTool]?
+
     public init(
         messages: [LLMMessage],
         model: String,
@@ -44,7 +52,8 @@ public struct LLMRequest: Sendable {
         topP: Double? = nil,
         stopSequences: [String] = [],
         requestId: String? = nil,
-        correlationId: String? = nil
+        correlationId: String? = nil,
+        tools: [AgentTool]? = nil
     ) {
         self.messages = messages
         self.model = model
@@ -54,5 +63,6 @@ public struct LLMRequest: Sendable {
         self.stopSequences = stopSequences
         self.requestId = requestId
         self.correlationId = correlationId
+        self.tools = tools
     }
 }
