@@ -2,7 +2,7 @@ import Foundation
 
 /// The result returned to the LLM after invoking a tool.
 public struct ToolCallResult: Sendable, Codable, Equatable {
-    /// Matches the `id` from the corresponding `ToolCallRequest`.
+    /// Matches the `id` from the corresponding `ToolCall`.
     public let toolCallId: String
     /// Serialised result content to send back to the model.
     public let content: String

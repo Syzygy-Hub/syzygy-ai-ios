@@ -1,20 +1,22 @@
 import Foundation
 
-// AgentRequest contains [AgentTool] which uses @unchecked Sendable; propagate here.
-public struct AgentRequest: @unchecked Sendable {
+public struct AgentRequest: Sendable {
     public let input: String
     public let tools: [AgentTool]
-    public let maxSteps: Int // v1.0.0 policy default: 10
+    /// Maximum number of agent steps before the run is terminated. Default: 10.
+    /// Exceeding the limit yields a truncated result. Values below 1 are
+    /// clamped to 1.
+    public let maxSteps: Int
     public let metadata: [String: String]
     public init(
         input: String,
         tools: [AgentTool] = [],
-        maxSteps: Int = 10, // v1.0.0 policy default: 10
+        maxSteps: Int = 10,
         metadata: [String: String] = [:]
     ) {
         self.input = input
         self.tools = tools
-        self.maxSteps = maxSteps
+        self.maxSteps = max(1, maxSteps)
         self.metadata = metadata
     }
 }
